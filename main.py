@@ -44,3 +44,23 @@ async def food_items(name: FoodEnum):
         return {"message": "it is vegatbles"}
     else:
         return {"message": "It is fruits"}
+
+
+items_db = [{"name": "apple"}, {"name": "mango"}, {"name": "banana"}]
+
+
+@app.get("/products")
+async def product_list(skip: int = 0, limit: int = 10):
+    return items_db[skip : skip + limit]
+
+
+@app.get("/products/{product_id}")
+async def get_product(
+    product_id: int, anish: str, q: str | None = None, short: bool = False
+):
+    item = {"item_id": product_id}
+    if q:
+        item.update({"q": q})
+    if not short:
+        item.update({"descriptin": "asdsasdad dadad addada adadsa "})
+    return item
