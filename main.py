@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from enum import Enum
 from pydantic import BaseModel
 
@@ -85,5 +85,20 @@ async def create_item(item: Item):
 
 @app.put("/item/{id}")
 async def create_item_with_put(id: int, item: Item):
-    result = {"item_id": id, **item.dict()}
+    result = {"item_id": id, **item.model_dump()}
     return result
+
+
+@app.get(
+    "/item",
+    description="dsadsadasd",
+    # tags="app",
+    name="dsadadad",
+    response_description="dsadsad",
+    status_code=500,
+)
+# async def read_items(q: str = Query(..., max_length=25, min_length=3)):   ... This will make it required with specifying any default value
+async def read_items(q: list[str] | None = Query(["sda", "sda"], deprecated=True)):
+    # async def read_items(q: str | None = Query(None)):
+    results = {"anish": "bista", "q": q}
+    return results
