@@ -1,5 +1,7 @@
+from typing import Optional
 from fastapi import FastAPI
 from enum import Enum
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -64,3 +66,24 @@ async def get_product(
     if not short:
         item.update({"descriptin": "asdsasdad dadad addada adadsa "})
     return item
+
+
+class Item(BaseModel):
+    name: str
+    price: int
+    description: str | None = None
+    tax: float | None = None
+
+
+@app.post("/item")
+async def create_item(item: Item):
+    item_dict = item.model_dump()
+    item_dict.update({"sdadsad": "anish"})
+    print(item_dict)
+    return item_dict
+
+
+@app.put("/item/{id}")
+async def create_item_with_put(id: int, item: Item):
+    result = {"item_id": id, **item.dict()}
+    return result
