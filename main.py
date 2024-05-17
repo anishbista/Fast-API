@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI, Path, Query
+from fastapi import Body, FastAPI, Path, Query
 from enum import Enum
 from pydantic import BaseModel
 
@@ -134,13 +134,23 @@ class User(BaseModel):
     name: str
 
 
-@app.put("items/{item_id}")
+@app.put("/items/{item_id}")
 async def update_item(
     *,
     item_id: int = Path(..., title="The id of the", ge=0, le=150),
     q: str | None = None,
     item: Item | None = None,
-    user: User | None = None
+    # item: Item = Body(..., embed=True),  this will ask to pass as key value pair instead of default like {
+    #   "item": {
+    #     "name": "string",
+    #     "price": 0
+    #   }
+    # }  instead of  {
+    # "name": "string",
+    # "price": 0
+    # }
+    user: User | None = None,
+    importance: int = Body(...)
 ):
     results = {"item_id": item_id}
     if q:
