@@ -1,5 +1,5 @@
 from typing import Literal
-from fastapi import Body, FastAPI, Path, Query
+from fastapi import Body, FastAPI, Form, Path, Query
 from pydantic import BaseModel, EmailStr, Field
 
 app = FastAPI()
@@ -104,3 +104,11 @@ async def read_user(id: Literal["a", "b", "d", "e"]):
 async def read_user(id: Literal["a", "b", "d", "e"]):
 
     return users[id]
+
+
+# Part 16 -> Form Fields
+
+
+@app.post("/login")
+async def login(username: str = Body(...), password: str = Form(...)):
+    return {"username": username}
