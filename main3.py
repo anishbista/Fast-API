@@ -1,5 +1,5 @@
 from typing import Literal
-from fastapi import Body, FastAPI, Form, Path, Query
+from fastapi import Body, Depends, FastAPI, Form, Path, Query
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, EmailStr, Field
 
@@ -53,9 +53,29 @@ async def patch_item(item_id: str, item: Item):
         stored_item_model = Item()
 
     print(stored_item_model)
-    update_data = item.model_dump(exclude_unset=True)
+    update_data = item.model_dump(
+        exclude_unset=True
+    )  # exclude_unset=True exclude all fields that is unset while post request
     print(update_data)
     updated_item = stored_item_model.model_copy(update=update_data)
     print(updated_item)
     items[item_id] = jsonable_encoder(updated_item)
     return updated_item
+
+
+# Part 22 - Dependencies Intro
+
+
+async def hello():
+    return "hello"
+
+
+async def common_parameters(
+    q: str | None = None, skip: int = 0, limit: int = 100, blah: str = Depends(hello)
+):
+    return {"q": q, "skip": skip, "limit": limit, "hello": blah}
+
+
+@app.get("/items/")
+async def get_items(commons: dict = Depends(common_parameters)):
+    return commons
