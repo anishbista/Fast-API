@@ -1,5 +1,15 @@
 from typing import Literal
-from fastapi import Body, Depends, FastAPI, Form, Path, Query
+from fastapi import (
+    Body,
+    Cookie,
+    Depends,
+    FastAPI,
+    Form,
+    HTTPException,
+    Header,
+    Path,
+    Query,
+)
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, EmailStr, Field
 
@@ -87,13 +97,19 @@ fake_items_db = [{"item_name": "apple"}, {"item_name": "banana"}]
 
 
 class CommonQueryParams:
-    def __init__(self, q: str | None = None, skip: int = 0, limit: int = 100):
+    def __init__(
+        self,
+        apple: str | None = Query(None),
+        q: str | None = None,
+        skip: int = 0,
+        limit: int = 100,
+    ):
         self.q = q
         self.skip = skip
         self.limit = limit
 
 
-@app.get("items_list/{item_list_id}")
+@app.post("/items_list/")
 async def get_items_list(commons=Depends(CommonQueryParams)):
     response = {}
     if commons.q:
@@ -101,3 +117,31 @@ async def get_items_list(commons=Depends(CommonQueryParams)):
     items = fake_items_db[commons.skip : commons.skip + commons.limit]
     response.update({"items": items})
     return response
+
+
+# Part 25 -> Dependencies in path operation decorators
+
+
+async def verify_token(x_token: str = Header(...)):
+    if x_token != "anish":
+        raise HTTPException(status_code=400, detail="Wrong token")
+
+
+async def verify_key(x_key: str = Header(...)):
+    if x_key != "bista":
+        raise HTTPException(status_code=400, detail="Wrong key")
+
+
+# app = FastAPI(dependencies=[Depends(verify_token), Depends(verify_key)])      #This will implement dependencies in all routes
+
+
+@app.get(
+    "/products/",
+)
+async def read_items():
+    return [{"item": "Foo"}]
+
+
+@app.get("/users/", dependencies=[Depends(verify_token), Depends(verify_key)])
+async def read_users():
+    return [{"username": "Rick"}, {"username": "Morty"}]
