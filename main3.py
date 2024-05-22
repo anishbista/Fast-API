@@ -79,3 +79,25 @@ async def common_parameters(
 @app.get("/items/")
 async def get_items(commons: dict = Depends(common_parameters)):
     return commons
+
+
+# Part 23 - Classes as Dependencies
+
+fake_items_db = [{"item_name": "apple"}, {"item_name": "banana"}]
+
+
+class CommonQueryParams:
+    def __init__(self, q: str | None = None, skip: int = 0, limit: int = 100):
+        self.q = q
+        self.skip = skip
+        self.limit = limit
+
+
+@app.get("items_list/{item_list_id}")
+async def get_items_list(commons=Depends(CommonQueryParams)):
+    response = {}
+    if commons.q:
+        response.update({"q": commons.q})
+    items = fake_items_db[commons.skip : commons.skip + commons.limit]
+    response.update({"items": items})
+    return response
